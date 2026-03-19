@@ -6,7 +6,7 @@ module ProgressCounter
 
     belongs_to :progressable, polymorphic: true
 
-    validates_presence_of :target
+    validates :target, presence: true, numericality: { greater_than: 0 }
     validates_presence_of :counter_type
     validates :current, numericality: { greater_than_or_equal_to: 0 }
 
@@ -22,14 +22,7 @@ module ProgressCounter
     #
     # @return [Hash] { current: Integer, done: Boolean }
     def incr
-      result = self.class.connection.exec_query(
-        self.class.sanitize_sql_array([<<-SQL, id])
-          UPDATE #{self.class.table_name}
-          SET current = current + 1
-          WHERE id = ?
-          RETURNING current, target, (current = target) as done;
-        SQL
-      ).first
+      result = execute_atomic_increment
 
       counter_value = result["current"]
       write_attribute(:current, counter_value)
@@ -38,7 +31,7 @@ module ProgressCounter
       # PostgreSQL returns true/false, SQLite returns 1/0, some may return "t"/"f"
       done = [true, 1, "t"].include?(result["done"])
 
-      { current: counter_value, done: done }
+      { current: counter_value, done: }
     end
 
     # Atomically increments the counter and checks if the target is reached
@@ -55,6 +48,23 @@ module ProgressCounter
     # @return [Boolean] true if current equals target
     def done?
       current == target
+    end
+
+    private
+
+    def execute_atomic_increment
+      result = self.class.connection.exec_query(
+        self.class.sanitize_sql_array([<<-SQL, id])
+          UPDATE #{self.class.table_name}
+          SET current = current + 1
+          WHERE id = ?
+          RETURNING current, target, (current = target) as done;
+        SQL
+      ).first
+
+      raise ActiveRecord::RecordNotFound, "Couldn't find #{self.class.name} with 'id'=#{id}" if result.nil?
+
+      result
     end
   end
 end

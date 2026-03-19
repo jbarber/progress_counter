@@ -39,6 +39,11 @@ RSpec.describe ProgressCounter::Model do
       3.times { counter.incr }
       expect(counter.reload.current).to eq(3)
     end
+
+    it "raises RecordNotFound when the counter has been deleted" do
+      counter.destroy!
+      expect { counter.incr }.to raise_error(ActiveRecord::RecordNotFound)
+    end
   end
 
   describe "#incr_and_done?" do
@@ -119,6 +124,36 @@ RSpec.describe ProgressCounter::Model do
       )
       expect(counter).not_to be_valid
       expect(counter.errors[:counter_type]).to be_present
+    end
+
+    it "is not valid with target: 0" do
+      counter = described_class.new(
+        progressable: test_model,
+        target: 0,
+        counter_type: "test"
+      )
+      expect(counter).not_to be_valid
+      expect(counter.errors[:target]).to be_present
+    end
+
+    it "is not valid with target: -1" do
+      counter = described_class.new(
+        progressable: test_model,
+        target: -1,
+        counter_type: "test"
+      )
+      expect(counter).not_to be_valid
+      expect(counter.errors[:target]).to be_present
+    end
+
+    it "is valid with target: 1" do
+      counter = described_class.new(
+        progressable: test_model,
+        target: 1,
+        counter_type: "test",
+        current: 0
+      )
+      expect(counter).to be_valid
     end
 
     it "requires current to be non-negative" do
