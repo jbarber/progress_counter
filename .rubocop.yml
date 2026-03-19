@@ -19,6 +19,7 @@ Metrics/BlockLength:
 
 Metrics/AbcSize:
   Exclude:
+    - "lib/progress_counter/model.rb"
     - "lib/progress_counter/trackable.rb"
 
 Metrics/MethodLength:

@@ -7,7 +7,7 @@ module ProgressCounter
     belongs_to :progressable, polymorphic: true
 
     validates :target, presence: true, numericality: { greater_than: 0 }
-    validates_presence_of :counter_type
+    validates :counter_type, presence: true
     validates :current, numericality: { greater_than_or_equal_to: 0 }
 
     attribute :current, :integer, default: 0
@@ -43,7 +43,10 @@ module ProgressCounter
       incr[:done]
     end
 
-    # Checks if the counter has reached its target
+    # Checks if the counter has reached its target using in-memory state.
+    # Note: this reads cached attributes — call `reload` first if you need
+    # fresh data from the database. For atomic done-checking in concurrent
+    # scenarios, use `incr_and_done?` instead.
     #
     # @return [Boolean] true if current equals target
     def done?
@@ -55,10 +58,10 @@ module ProgressCounter
     def execute_atomic_increment
       result = self.class.connection.exec_query(
         self.class.sanitize_sql_array([<<-SQL, id])
-          UPDATE #{self.class.table_name}
+          UPDATE #{self.class.connection.quote_table_name(self.class.table_name)}
           SET current = current + 1
           WHERE id = ?
-          RETURNING current, target, (current = target) as done;
+          RETURNING current, (current = target) as done;
         SQL
       ).first
 
