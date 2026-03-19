@@ -127,6 +127,29 @@ RSpec.describe ProgressCounter::Trackable do
     end
   end
 
+  describe "#destroy_{name}_counter" do
+    it "destroys and returns the counter" do
+      model.create_intent_counter(target: 10)
+
+      result = model.destroy_intent_counter
+      expect(result).to be_destroyed
+      expect(model.find_intent_counter).to be_nil
+    end
+
+    it "returns nil when the counter does not exist" do
+      expect(model.destroy_intent_counter).to be_nil
+    end
+
+    it "allows re-creation after destroy" do
+      model.create_intent_counter(target: 10)
+      model.destroy_intent_counter
+
+      counter = model.create_intent_counter(target: 20)
+      expect(counter).to be_persisted
+      expect(counter.target).to eq(20)
+    end
+  end
+
   describe "integration with counter methods" do
     it "works with incr_and_done?" do
       model.create_intent_counter(target: 2)

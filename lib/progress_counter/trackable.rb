@@ -56,6 +56,12 @@ module ProgressCounter
           progress_counters.find_by(counter_type: name.to_s)
         end
 
+        # Destroys the counter if it exists, returns nil otherwise
+        define_method("destroy_#{name}_counter") do
+          counter = progress_counters.find_by(counter_type: name.to_s)
+          counter&.destroy
+        end
+
         # Creator - builds new counter with target
         define_method("create_#{name}_counter") do |target:|
           progress_counters.create!(counter_type: name.to_s, target:)
