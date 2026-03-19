@@ -45,10 +45,14 @@ RSpec.configure do |config|
 
   # Clean up database between tests using transactions
   # Skip this for PostgreSQL concurrency tests which need real commits
-  config.around(:each, postgres: false) do |example|
-    ActiveRecord::Base.transaction do
+  config.around(:each) do |example|
+    if example.metadata[:postgres]
       example.run
-      raise ActiveRecord::Rollback
+    else
+      ActiveRecord::Base.transaction do
+        example.run
+        raise ActiveRecord::Rollback
+      end
     end
   end
 end
