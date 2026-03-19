@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -e
+
+# PostgreSQL concurrency test runner
+# This script sets up a test database and runs the concurrency tests
+
+echo "==> Setting up PostgreSQL test database..."
+
+# Default configuration
+POSTGRES_HOST=${POSTGRES_HOST:-localhost}
+POSTGRES_PORT=${POSTGRES_PORT:-5432}
+POSTGRES_USER=${POSTGRES_USER:-postgres}
+POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+POSTGRES_DB=${POSTGRES_DB:-progress_counter_test}
+
+# Export for use by specs
+export POSTGRES_HOST
+export POSTGRES_PORT
+export POSTGRES_USER
+export POSTGRES_PASSWORD
+export POSTGRES_DB
+
+echo "Configuration:"
+echo "  Host: $POSTGRES_HOST"
+echo "  Port: $POSTGRES_PORT"
+echo "  User: $POSTGRES_USER"
+echo "  Database: $POSTGRES_DB"
+echo ""
+
+# Check if PostgreSQL is available
+if ! command -v psql &> /dev/null; then
+    echo "ERROR: psql command not found. Please install PostgreSQL client."
+    exit 1
+fi
+
+# Try to create the test database (ignore if it exists)
+echo "==> Creating test database (if needed)..."
+PGPASSWORD=$POSTGRES_PASSWORD createdb -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER $POSTGRES_DB 2>/dev/null || echo "Database already exists"
+
+echo ""
+echo "==> Running concurrency tests..."
+bundle exec rspec spec/concurrency_spec.rb --format documentation
+
+echo ""
+echo "==> Concurrency tests complete!"

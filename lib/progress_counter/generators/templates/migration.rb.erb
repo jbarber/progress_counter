@@ -1,0 +1,14 @@
+class CreateProgressCounters < ActiveRecord::Migration[<%= ActiveRecord::Migration.current_version %>]
+  def change
+    create_table :progress_counters do |t|
+      t.references :progressable, polymorphic: true, null: false
+      t.integer :current, default: 0
+      t.integer :target, null: false
+      t.string :counter_type, null: false
+
+      t.timestamps
+    end
+
+    add_index :progress_counters, [:progressable_type, :progressable_id, :counter_type], unique: true, name: 'idx_progress_counters_unique'
+  end
+end
