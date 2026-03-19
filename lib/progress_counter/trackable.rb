@@ -22,10 +22,13 @@ module ProgressCounter
     class_methods do
       # Defines a named progress counter for this model.
       #
-      # This creates three methods:
+      # This creates six methods:
       # - `{name}_counter` - finds the existing counter (raises if not found)
+      # - `find_{name}_counter` - finds the existing counter (returns nil if not found)
       # - `create_{name}_counter(target:)` - creates a new counter
       # - `{name}_counter!(target:)` - finds or creates the counter
+      # - `destroy_{name}_counter` - destroys the counter (returns nil if not found)
+      # - `reset_{name}_counter(target: nil)` - resets current to 0 (raises if not found)
       #
       # @param name [Symbol] the name/type of the counter
       #
@@ -36,6 +39,9 @@ module ProgressCounter
       #   topic.create_intent_counter(target: 10)
       #   topic.intent_counter.incr_and_done?
       #   topic.intent_counter!(target: 10)  # find or create
+      #   topic.find_intent_counter           # nil if missing
+      #   topic.destroy_intent_counter        # clean up
+      #   topic.reset_intent_counter          # re-run
       #
       def progress_counter(name)
         # Set up association once
