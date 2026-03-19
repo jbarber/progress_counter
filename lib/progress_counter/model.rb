@@ -10,8 +10,6 @@ module ProgressCounter
     validates :counter_type, presence: true
     validates :current, numericality: { greater_than_or_equal_to: 0 }
 
-    attribute :current, :integer, default: 0
-
     # Atomically increments the counter and returns a hash with the new value and done status.
     # This uses a direct SQL UPDATE...RETURNING statement to ensure
     # thread-safety across concurrent workers.
