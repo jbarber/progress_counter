@@ -99,6 +99,19 @@ RSpec.describe ProgressCounter::Trackable do
       counter = model.intent_counter!(target: 999)
       expect(counter.target).to eq(10)
     end
+
+    it "handles RecordNotUnique from concurrent creation" do
+      model.create_intent_counter(target: 10)
+
+      # Simulate race: find_or_create_by! tries to create and hits unique constraint
+      allow(model.progress_counters).to receive(:find_or_create_by!)
+        .and_raise(ActiveRecord::RecordNotUnique)
+
+      # Should rescue and fall back to find_by!
+      counter = model.intent_counter!(target: 10)
+      expect(counter).to be_persisted
+      expect(counter.counter_type).to eq("intent")
+    end
   end
 
   describe "integration with counter methods" do

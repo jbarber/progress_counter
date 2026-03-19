@@ -17,6 +17,10 @@ Metrics/BlockLength:
     - "spec/**/*"
     - "*.gemspec"
 
+Metrics/AbcSize:
+  Exclude:
+    - "lib/progress_counter/trackable.rb"
+
 Metrics/MethodLength:
   Exclude:
     - "lib/progress_counter/model.rb"

@@ -61,6 +61,8 @@ module ProgressCounter
           progress_counters.find_or_create_by!(counter_type: name.to_s) do |c|
             c.target = target
           end
+        rescue ActiveRecord::RecordNotUnique
+          progress_counters.find_by!(counter_type: name.to_s)
         end
       end
     end
