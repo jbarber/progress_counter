@@ -46,9 +46,14 @@ module ProgressCounter
                    dependent: :destroy
         end
 
-        # Accessor - finds existing counter
+        # Accessor - finds existing counter (raises if not found)
         define_method("#{name}_counter") do
           progress_counters.find_by!(counter_type: name.to_s)
+        end
+
+        # Nil-safe accessor - finds existing counter or returns nil
+        define_method("find_#{name}_counter") do
+          progress_counters.find_by(counter_type: name.to_s)
         end
 
         # Creator - builds new counter with target

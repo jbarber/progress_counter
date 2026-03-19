@@ -114,6 +114,19 @@ RSpec.describe ProgressCounter::Trackable do
     end
   end
 
+  describe "#find_{name}_counter" do
+    it "returns the counter when it exists" do
+      created = model.create_intent_counter(target: 10)
+
+      found = model.find_intent_counter
+      expect(found).to eq(created)
+    end
+
+    it "returns nil when the counter does not exist" do
+      expect(model.find_intent_counter).to be_nil
+    end
+  end
+
   describe "integration with counter methods" do
     it "works with incr_and_done?" do
       model.create_intent_counter(target: 2)
