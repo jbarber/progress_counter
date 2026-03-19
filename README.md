@@ -250,7 +250,7 @@ def incr
       UPDATE progress_counters
       SET current = current + 1
       WHERE id = ?
-      RETURNING current, target, (current >= target) as done;
+      RETURNING current, target, (current = target) as done;
     SQL
   ).first
 
@@ -265,7 +265,7 @@ This `UPDATE ... RETURNING` statement:
 4. Returns both the new value and the done status
 5. Releases the lock
 
-All in a single database round-trip with no possibility of race conditions. The critical insight is that the comparison `(current >= target)` happens **atomically inside the database**, ensuring only one worker will ever receive `done: true` when the target is first reached.
+All in a single database round-trip with no possibility of race conditions. The critical insight is that the comparison `(current = target)` happens **atomically inside the database**, ensuring exactly one worker receives `done: true` — the one whose increment lands precisely on the target.
 
 ## Database Support
 

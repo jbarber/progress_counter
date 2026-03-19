@@ -46,7 +46,7 @@ if postgres_available?
     ActiveRecord::Schema.define do
       create_table :progress_counters, force: true do |t|
         t.references :progressable, polymorphic: true, null: false
-        t.integer :current, default: 0
+        t.integer :current, default: 0, null: false
         t.integer :target, null: false
         t.string :counter_type, null: false
         t.timestamps
