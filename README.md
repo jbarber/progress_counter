@@ -157,7 +157,7 @@ class Topic < ApplicationRecord
 end
 ```
 
-This generates three methods per counter:
+This generates six methods per counter:
 
 ```ruby
 # Create a new counter
@@ -166,8 +166,18 @@ topic.create_intent_counter(target: 100)
 # Find existing counter (raises RecordNotFound if missing)
 topic.intent_counter
 
+# Find existing counter (returns nil if missing)
+topic.find_intent_counter
+
 # Find or create counter
 topic.intent_counter!(target: 100)
+
+# Reset counter to 0 (optionally update target, raises if missing)
+topic.reset_intent_counter
+topic.reset_intent_counter(target: 200)
+
+# Destroy counter (returns nil if missing)
+topic.destroy_intent_counter
 ```
 
 The fan-out/fan-in example becomes:
