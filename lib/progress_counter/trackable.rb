@@ -67,6 +67,15 @@ module ProgressCounter
           progress_counters.create!(counter_type: name.to_s, target:)
         end
 
+        # Resets current to 0 (and optionally updates target). Raises if not found.
+        define_method("reset_#{name}_counter") do |target: nil|
+          counter = progress_counters.find_by!(counter_type: name.to_s)
+          attrs = { current: 0 }
+          attrs[:target] = target if target
+          counter.update!(attrs)
+          counter
+        end
+
         # Find or create
         define_method("#{name}_counter!") do |target:|
           progress_counters.find_or_create_by!(counter_type: name.to_s) do |c|

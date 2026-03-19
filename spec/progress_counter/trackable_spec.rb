@@ -150,6 +150,36 @@ RSpec.describe ProgressCounter::Trackable do
     end
   end
 
+  describe "#reset_{name}_counter" do
+    it "resets current to 0" do
+      counter = model.create_intent_counter(target: 10)
+      counter.update!(current: 5)
+
+      result = model.reset_intent_counter
+      expect(result.current).to eq(0)
+      expect(result.target).to eq(10)
+    end
+
+    it "updates target when provided" do
+      model.create_intent_counter(target: 10)
+
+      result = model.reset_intent_counter(target: 20)
+      expect(result.current).to eq(0)
+      expect(result.target).to eq(20)
+    end
+
+    it "keeps target when not provided" do
+      model.create_intent_counter(target: 10)
+
+      result = model.reset_intent_counter
+      expect(result.target).to eq(10)
+    end
+
+    it "raises RecordNotFound when counter does not exist" do
+      expect { model.reset_intent_counter }.to raise_error(ActiveRecord::RecordNotFound)
+    end
+  end
+
   describe "integration with counter methods" do
     it "works with incr_and_done?" do
       model.create_intent_counter(target: 2)
